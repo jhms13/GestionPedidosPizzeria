@@ -1,0 +1,142 @@
+import {useState, useEffect} from 'react';
+import {MenuProps, Variant} from './menuCarrousel';
+
+/**
+ * nombre de la funcion: PizzaCardWide
+ * parametros: {pizza} (Tipo: MenuProps) - Objeto con la información completa de la pizza y sus variantes disponibles.
+ * retorno: Componente JSX (Tarjeta de pizza extendida).
+ * funcionalidad: Sub-componente encargado de renderizar una presentación horizontal "tipo banner" para cada pizza en el menú principal. Incluye controles selectores que actualizan en tiempo real el precio de la talla mostrada.
+ */
+function PizzaCardWide({pizza}: {pizza: MenuProps}){
+    
+    //Estado local para controlar cual variante esta seleccionada en el select, se inicializa con la primera variante disponible
+    const [selectedVariant, setSelectedVariant] = useState<Variant>(pizza.variantes[0]);
+
+    /**
+     * nombre de la funcion: handleChange
+     * parametros: e (React.ChangeEvent<HTMLSelectElement>) - El evento disparado al interactuar con el menú desplegable.
+     * retorno: void (Sin retorno).
+     * funcionalidad: Lee el nuevo valor (ID de variante) que escogió el usuario, filtra el arreglo de variantes buscando el registro que coincida y lo define en el estado interno para actualizar el valor visual.
+     */
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = Number(e.target.value);
+        const newVariant = pizza.variantes.find(v => v.id_variante == id);
+        if (newVariant) {
+            setSelectedVariant(newVariant);
+        }
+    }
+    
+    //Retorno para mostrar la tarjeta de la pizza, con su imagen, nombre, select para elegir la variante y el precio actualizado segun la elegida
+    return (
+        <div className="bg-white rounded-xl overflow-hidden shadow-md flex flex-col w-full mb-6 border border-gray-100">
+            {/* 1. La imagen formato Wide (Banner) */}
+            <div className="w-full h-48 md:h-64">
+                <img 
+                /* se coloca en localhost mientras no este desplegado en produccion  */
+                    src={`http://localhost:3000${pizza.imagen_url}`} 
+                    className="w-full h-full object-cover" 
+                    alt={pizza.nombre}
+                />
+            </div>
+
+            {/* 2. El contenido inferior */}
+            <div className="p-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                
+                {/* Lado izquierdo: Textos */}
+                <div className="w-full md:w-2/3">
+                    <h3 className="font-bold text-xl text-gray-900">{pizza.nombre}</h3>
+                    {/* line-clamp-2 recorta el texto si es muy largo para que no dañe el diseño */}
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{pizza.descripcion}</p>
+                    
+                    {/* Las estrellitas estáticas por ahora */}
+                    <div className="flex items-center mt-2 text-sm text-gray-600">
+                        <span className="text-gray-800 tracking-widest mr-2">⭐⭐⭐⭐⭐</span> 
+                        <span className="font-semibold">4.7</span>
+                    </div>
+                </div>
+
+                {/* Lado derecho: Controles y botón */}
+                <div className="flex flex-row items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                    
+                    <div className="flex flex-col items-end">
+                        <select 
+                            className="p-1 mb-1 bg-transparent text-sm outline-none font-semibold text-gray-700 cursor-pointer"
+                            value={selectedVariant.id_variante} 
+                            onChange={handleChange}
+                        >
+                            {pizza.variantes.map((v) => (
+                                <option key={v.id_variante} value={v.id_variante}>
+                                    {v.tamano} - ${Number(v.precio).toFixed(2)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button className="rounded-full bg-[#f08a5d] text-white text-sm font-semibold px-6 py-2 hover:bg-orange-600 transition-colors shadow-sm whitespace-nowrap">
+                        Añadir al carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/**
+ * nombre de la funcion: MenuSection
+ * parametros: Ninguno.
+ * retorno: Componente JSX (Bloque estructural completo del menú).
+ * funcionalidad: Actúa como el bloque contenedor de toda la oferta gastronómica. Pide el arreglo de productos al backend, maneja el estado de "Cargando" si los datos aún no llegan, y delega el renderizado de cada ítem a 'PizzaCardWide'.
+ */
+export default function MenuSection() {
+    // Estado para controlar la pizzas obtenidas desde el backend
+    const [pizzas, setPizzas] = useState<MenuProps[]>([]);
+
+    // Efecto para cargar el menu desde el backend al iniciar el componente, guardandolo en el estado 'pizzas'
+    useEffect(() => {
+        /**
+         * nombre de la funcion: loadProducts
+         * parametros: Ninguno.
+         * retorno: Promise<void> (Asíncrona).
+         * funcionalidad: Consume la ruta GET '/api/productos' del backend local para hidratar el componente con la información normalizada de pizzas y tallas.
+         */
+        const loadProducts = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/productos');
+                const data = await response.json();
+                setPizzas(data);
+            } catch(error) {
+                console.error("Error al obtener el menu: ", error);
+            }
+        };
+        loadProducts();
+    }, []);
+
+    //Mnesaje de carga mientras se obtienen las pizzas desde el backend
+    if (pizzas.length === 0) {
+        return (
+            <div className="bg-[#1a4b8c] w-full py-12 px-4 text-center">
+                <p className="text-white font-bold text-xl">Cargando menú completo... 🍕</p>
+            </div>
+        );
+    }
+
+    // Retorno para mostrar la seccion del menu, con un titulo y mapear las pizzas obtenidas mostrando cada una con el componnente 'PizzaCardWide'
+    return (
+        <div className="bg-[#1a4b8c] w-full py-12 px-4">
+            <div className="max-w-5xl mx-auto">
+                
+                <div className="text-center mb-8">
+                    <h2 className="text-4xl font-bold text-white mb-2 tracking-wide">Menú</h2>
+                    <p className="text-blue-200 text-sm">Donde el paladar recibe un amor inigualable</p>
+                </div>
+
+                <div className="flex flex-col">
+                    {pizzas.map((pizza) => (
+                        <PizzaCardWide key={pizza.id_producto} pizza={pizza} />
+                    ))}
+                </div>
+
+            </div>
+        </div>
+    )
+}
