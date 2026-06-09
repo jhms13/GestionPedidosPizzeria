@@ -18,14 +18,6 @@ function Navbar() {
         <div></div>
       )}
 
-      {ubicacion.pathname === "/" ? (
-        <Link to="/carrito" className="inline-block">
-          <img src="/images/carrito.png" alt="ir al carrito" className="w-10 h-10 hover:scale-110 transition-transform" />
-        </Link>
-      ) : (
-        <div></div>
-      )}
-
 
     </div>
   )
