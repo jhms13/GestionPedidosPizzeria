@@ -1,4 +1,4 @@
-import MenuPrincipal from "./pages/MenuPrincipal";
+import MenuPrincipal from "./pages/login";
 
 function App() {
   return (
