@@ -12,7 +12,6 @@ app.use(cors()); // Permite que React se conecte
 app.use(express.json()); // Permite recibir datos en formato JSON (para el carrito)
 
 // --- ENLACE ESTÁTICO UNIVERSAL (LOCAL Y PRODUCCIÓN) ---
-const path = require('path');
 
 // __dirname siempre apunta a 'backend/src/config' (estés donde estés).
 // Subimos un nivel ('..') para salir de config, otro nivel ('..') para salir de src, 
