@@ -2,7 +2,6 @@ import {useState, useEffect} from "react";
 import { useCart } from './cartContext'
 import { useNavigate } from "react-router-dom";
 // @ts-ignore: allow importing image assets without explicit type declarations
-import cabezalImg from '../assets/cabezal-panucci.png'
 import { API_URL } from "../constants/api";
 
 //Definicion de tipos para las props
